@@ -1,0 +1,26 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+A	main.c	3;"	d	file:
+B	main.c	4;"	d	file:
+a	main.c	/^int a;$/;"	v
+add	main.c	/^int add;$/;"	v
+add	main.c	/^void add(int a, int b)$/;"	f
+ch	getfunc.py	/^    ch = 0$/;"	v
+ch	getfunc.py	/^    ch = input("select your ch?")$/;"	v
+fn	getfunc.py	/^fn = ret[ch][1] $/;"	v
+foo	main.c	/^void foo(void *ppt)$/;"	f
+how	getfunc.py	/^how = ret[ch][2]$/;"	v
+index	getfunc.py	/^        index = src_buf.index(j)$/;"	v
+main	main.c	/^int main(int argc, char *argv[])$/;"	f
+printfunc	getfunc.py	/^def printfunc(src_buf, s_index):$/;"	f
+ret	getfunc.py	/^ret = []$/;"	v
+searchObj	getfunc.py	/^searchObj = re.search( r'\/\\^(.*)\\$\/;"', how)$/;"	v
+src_buf	getfunc.py	/^src_buf = open(fn, "r").read().split('\\n')$/;"	v
+sym	getfunc.py	/^sym = ret[ch][0]$/;"	v
+symtype	getfunc.py	/^symtype = ret[ch][3]$/;"	v
+t	getfunc.py	/^        t = l.split('\\t')$/;"	v
+tags_buf	getfunc.py	/^tags_buf = open("tags", "r").read().split('\\n')$/;"	v

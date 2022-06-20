@@ -4,6 +4,7 @@
 #define B(X) (X+12)
 
 int a;
+int add;
 
 void add(int a, int b)
 {

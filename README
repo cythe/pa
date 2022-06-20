@@ -1,0 +1,22 @@
+PRE:
+1. 获取所有patch路径
+    生成ctags的路径集 --> list
+    获取抽样路径(将tags文件数目限制在一定范围, 避免文件过多)
+2. 获取所有要更改的函数名称. --> list
+3. 比对当前源码函数和patch打完后函数差别, 完全一致则无必要更改, 删除所有关联hunk. --> file write back
+4. patch中无hunk的时候表示该patch无用, 删除. --> scan for hunks
+5. 需要保留patch.ori, 需要在OVER[1]中用到.
+
+PATCH:
+1. 执行am程序.
+2. 冲突执行apply程序.
+3*. 对hunk进行分析, 进入C parser, 对更改进行分析定位
+    (函数内, 函数外, 宏定义, include, 全局变量, 函数声明)
+4. 精简hunk, 最终生成有效hunk. --> file write back
+5. 需要人工介入解决冲突
+6. 打完这个patch后对后续patch进行优化(pre).
+
+OVER:
+1. 对patch的更改进行人工注释.
+2. 执行bisect.sh脚本, 对patches进行验证.
+
