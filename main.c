@@ -5,6 +5,11 @@
 
 int a;
 
+void add(int a, int b)
+{
+    return a+b;
+}
+
 void foo(void *ppt)
 {
     print("foo\n");
