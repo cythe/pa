@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ ! -d .trash_rejs ]; then
+    mkdir .trash_rejs
+else
+    rm -f .trash_rejs/*
+fi
+
+# remove *.rej
+rej=`find . -name "*.rej" | grep -v .trash_rejs`
+if [ "$rej" != "" ]; then
+    mv -vf $rej .trash_rejs/
+fi
+
+# remove *.rej.re
+rej=`find . -name "*.rej.re" | grep -v .trash_rejs`
+if [ "$rej" != "" ]; then
+    mv -vf $rej .trash_rejs/
+fi
+
+# remove txt
+mv -vf *_refer.txt .trash_rejs/
+mv -vf *_target.txt .trash_rejs/

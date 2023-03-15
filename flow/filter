@@ -1,0 +1,81 @@
+#!/bin/bash
+
+################## Please Config Me First ##################
+
+# bcompare / vimdiff / meld / other ?
+DIFFAPP=bcompare
+
+# Search Field
+# Generally:
+#	START_TAG=which tag would you like to search start with ??
+#	END_TAG=
+#START_TAG=v5.3-rc8
+START_TAG=v5.15-rc7
+END_TAG=
+
+# Patches DIR
+# TDIR
+# ├── patch will be droped   -> patches.drop
+# └── patch will be applied  -> patches.todo
+# Get from cmd line by default
+TDIR=$1
+
+######################## Config End ########################
+
+
+WORK_DIR=$(dirname $(readlink -f $0))
+. $WORK_DIR/../color
+
+if [ ! -d patches.drop ]; then
+    mkdir patches.drop
+fi
+
+if [ ! -d patches.todo ]; then
+    mkdir patches.todo
+fi
+
+for f in `ls $TDIR/*.patch`
+do
+    echo 
+    echo_c SC_CYAN "[Process]: $f"
+
+    subject=`cat $f | grep "^Subject: \[" | awk -F '] ' '{print $2}'`
+    echo_c SC_BLUE "[Find Subject]: $subject"
+    # 加个参数 1-10
+    commits=$(git log --no-merges --grep="$subject" $START_TAG..$END_TAG | \
+	    grep '^commit\s\w*' | cut -d ' ' -f2)
+    
+    if [ "X$commits" != "X" ]; then
+	echo_c SC_BLUE "[Found Commits]: $commits"
+    else
+	mv $f patches.todo
+	continue
+    fi
+
+    # Reverse commits, make old --> new order
+    commits=`python $WORK_DIR/../reverse.py $commits`
+
+    # We can find more than one commit, deal with every one
+    for c in $commits
+    do
+	echo_c SC_GREEN "Please compare this patch with commit [$c]."
+	patchname=`git format-patch -1 $c -o patches.temp`
+	mv $patchname $patchname.$c.patch.same
+
+	python $WORK_DIR/../checksame.py $patchname.$c.patch.same $f
+	# $DIFFAPP $f $patchname.$c.patch.same
+
+	if [ "$?" = "0" ]; then
+	    mv $f patches.drop
+	    BN=$(basename $f)
+	    mv $patchname.$c.patch.same patches.drop/$BN.$c.same
+	    break
+	fi
+    done
+
+    if [ -f $f ]; then
+	mv $f patches.todo
+    fi
+    rm -f patches.temp/*
+done
+

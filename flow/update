@@ -1,0 +1,3 @@
+#!/bin/bash
+
+mv -v `ls patches.todo/*.patch | head -n 1` patches.over 

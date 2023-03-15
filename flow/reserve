@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [ ! -d patches.reserve ]; then
+    mkdir patches.reserve
+fi
+
+mv -v `ls patches.todo/*.patch | head -n 1` patches.reserve

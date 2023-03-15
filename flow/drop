@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [ ! -d patches.drop ]; then
+    mkdir patches.drop
+fi
+
+mv -v `ls patches.todo/*.patch | head -n 1` patches.drop
