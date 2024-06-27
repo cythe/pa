@@ -34,12 +34,11 @@ create_dir patches.todo
 
 for f in `ls $TDIR/*.patch`
 do
-    echo 
+    echo
     echo_c SC_CYAN "[Process]: $f"
 
     subject=`cat $f | grep "^Subject: \[" | awk -F '] ' '{print $2}'`
     echo_c SC_BLUE "[Find Subject]: $subject"
-    # 加个参数 1-10
     commits=$(git log --no-merges --grep="$subject" $START_TAG..$END_TAG | \
 	    grep '^commit\s\w*' | cut -d ' ' -f2)
     
@@ -50,23 +49,44 @@ do
 	continue
     fi
 
-    # Reverse commits, make old --> new order
-    commits=`python $WORK_DIR/../reverse.py $commits`
+    # Maybe we can find more than one commit, deal with every one
+    # 先遍历一遍, 看看git patch-id是不是一样
+    for c in $commits
+    do
+	mkdir patches.temp/$c
+	patchname=`git format-patch -1 $c -o patches.temp/$c`
 
-    # We can find more than one commit, deal with every one
+	patchidsrc=`cat $f | git patch-id | cut -d ' ' -f1`
+	patchiddest=`cat $patchname | git patch-id | cut -d ' ' -f1`
+	if [ "X$patchidsrc" = "X$patchiddest" ]; then
+	    echo_c SC_BLUE "patch-id are:"
+	    echo_c SC_BLUE "    $patchidsrc"
+	    echo_c SC_BLUE "    $patchiddest"
+	    mv $f patches.drop/same/
+	    BN=$(basename $f)
+	    mv $patchname patches.drop/same/$BN.same
+	    break
+	fi
+    done
+
+    # 如果patch-id相同, 不继续比较了, 处理下一个文件
+    if [ ! -f $f ]; then
+	rm -f patches.temp/*
+	continue
+    fi
+
     for c in $commits
     do
 	echo_c SC_GREEN "Please compare this patch with commit [$c]."
-	patchname=`git format-patch -1 $c -o patches.temp`
-	mv $patchname $patchname.$c.patch.same
+	patchname=`ls patches.temp/$c/*.patch`
+	$DIFFAPP $f $patchname
 
-	python $WORK_DIR/../checksame.py $patchname.$c.patch.same $f
-	# $DIFFAPP $f $patchname.$c.patch.same
-
-	if [ "$?" = "0" ]; then
-	    mv $f patches.drop
+	read -p 'Are these two patches the same?? [y|N]: ' choice
+	echo "choice = $choice"
+	if [ "X$choice" = "Xy" ]; then
+	    mv $f patches.drop/same/
 	    BN=$(basename $f)
-	    mv $patchname.$c.patch.same patches.drop/$BN.$c.same
+	    mv $patchname patches.drop/same/$BN.same
 	    break
 	fi
     done
