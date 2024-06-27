@@ -1,21 +1,13 @@
 #!/bin/bash
 
 WORK_DIR=$(dirname $(readlink -f $0))
-. $WORK_DIR/../color
+. $WORK_DIR/../utils
 
 patches_dir=patches.todo
 patched_dir=patches.over
 ref_dir=patches.ref
 
-if [ ! -d $patched_dir ]; then
-    mkdir $patched_dir
-fi
-
-patch_list=`ls $patches_dir/*.patch | sort`
-if [ "$patch_list" = "" ]; then
-    echo_c SC_GREEN "There is no patches in this dir."
-    exit 2
-fi
+create_dir $patched_dir
 
 function do_patch() {
     echo_c SC_GREEN "op: $1"
@@ -26,7 +18,7 @@ function do_patch() {
 	git apply --reject $1
 	echo 
 	git status --no-ahead-behind
-	echo_c SC_RED "op: $1"
+	echo_c SC_RED "err: $1"
 	echo 
 	exit 8;
     fi
@@ -34,19 +26,19 @@ function do_patch() {
 
 if [ $# -gt 0 ]; then
     if [ "$1" == "1" ]; then
-	for f in $patch_list
-	do
-	    do_patch $f
-	    exit 0;
-	done 
-    else 
+       for f in $patch_list
+       do
+           do_patch $f
+           exit 0;
+       done
+    else
 	do_patch $1
     fi
 else
     for f in $patch_list
     do
 	do_patch $f
-    done 
+    done
 
     exit 0;
 fi

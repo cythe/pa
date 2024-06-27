@@ -1,7 +1,12 @@
 #!/bin/bash
 
-if [ ! -d patches.reserve ]; then
-    mkdir patches.reserve
-fi
+WORK_DIR=$(dirname $(readlink -f $0))
+. $WORK_DIR/../utils
+
+create_dir patches.reserve
+
+git checkout .
+clean_rej
+git am --abort
 
 mv -v `ls patches.todo/*.patch | head -n 1` patches.reserve

@@ -3,14 +3,16 @@
 ################## Please Config Me First ##################
 
 # bcompare / vimdiff / meld / other ?
-DIFFAPP=bcompare
+DIFFAPP=vimdiff
+#DIFFAPP=~/buildarea/rootfs.diy/usr/bin/bcompare
 
 # Search Field
 # Generally:
-#	START_TAG=which tag would you like to search start with ??
+#	START_TAG=SDK base on which kernel TAG
 #	END_TAG=
 #START_TAG=v5.3-rc8
-START_TAG=v5.15-rc7
+#START_TAG=v5.15-rc7
+START_TAG=v6.0-rc7
 END_TAG=
 
 # Patches DIR
@@ -24,15 +26,11 @@ TDIR=$1
 
 
 WORK_DIR=$(dirname $(readlink -f $0))
-. $WORK_DIR/../color
+. $WORK_DIR/../utils
 
-if [ ! -d patches.drop ]; then
-    mkdir patches.drop
-fi
-
-if [ ! -d patches.todo ]; then
-    mkdir patches.todo
-fi
+create_dir patches.drop/same
+create_dir patches.drop/revert
+create_dir patches.todo
 
 for f in `ls $TDIR/*.patch`
 do
