@@ -25,16 +25,34 @@ function do_patch() {
 }
 
 if [ $# -gt 0 ]; then
-    if [ "$1" == "1" ]; then
-       for f in $patch_list
-       do
-           do_patch $f
-           exit 0;
-       done
+    if grep '^[[:digit:]]*$' <<< "$1"; then
+	# $1 is a num
+	patch_num=`ls $patches_dir/*.patch | wc -l`
+	echo_c SC_GREEN "There are $patch_num patches in $patches_dir"
+	if [ $1 -le $patch_num ]; then
+	    patch_list=`ls $patches_dir/*.patch | sort | head -n $1`
+	    for f in $patch_list
+	    do
+		do_patch $f
+	    done
+	else
+	    echo_c SC_RED "这儿没那么多patch !."
+	    exit 2
+	fi
     else
+	# $1 is patch path
+	if [ ! -f $1 ]; then
+	    echo_c SC_RED "$1 is not exists.."
+	    exit 2
+	fi
 	do_patch $1
     fi
 else
+    patch_list=`ls $patches_dir/*.patch | sort`
+    if [ "$patch_list" = "" ]; then
+        echo_c SC_GREEN "There is no patches in this dir."
+        exit 2
+    fi
     for f in $patch_list
     do
 	do_patch $f
