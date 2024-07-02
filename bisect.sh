@@ -1,7 +1,12 @@
 #!/bin/bash
 
-PDIR=$(dirname $(readlink -f $0))
-. $PDIR/utils
+PADIR=$(dirname $(readlink -f $0))
+. $PADIR/utils
+
+which apply > /dev/null 2>&1
+if [ "$?" != "0" ]; then
+    source $PADIR/pa.init
+fi
 
 WORK_DIR=`pwd`
 
@@ -28,11 +33,6 @@ set_env() {
     export PATH=$PATH:$WORK_DIR/$PPRE/usr/bin/aarch64-wrs-linux
 }
 
-pushd $KERNEL_DIR
-if [ ! -x patch ]; then
-    $PDIR/install-flow-for-this-kernel-tree.sh
-fi
-popd
 
 allyesmake() {
     rm -rf $OUT_DIR
@@ -74,7 +74,7 @@ bisect(){
     while true
     do
 	pushd $KERNEL_DIR
-	./patch 1
+	apply 1
 	if [ "$?" != "0" ]; then
 	    break
 	fi
