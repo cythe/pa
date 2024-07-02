@@ -37,9 +37,10 @@ do
     echo
     echo_c SC_CYAN "[Process]: $f"
 
-    subject=`cat $f | grep "^Subject: \[" | awk -F '] ' '{print $2}'`
+    subject=`cat $f | grep "^Subject: \[" | awk '/^Subject: \[PATCH [0-9]+\/[0-9]+\]/ { match($0, /\[PATCH ([0-9]+)\/([0-9]+)\] (.*)/, arr); print arr[3] }'`
     echo_c SC_BLUE "[Find Subject]: $subject"
-    commits=$(git log --no-merges --grep="$subject" $START_TAG..$END_TAG | \
+    escaped_subject=$(echo $subject | sed 's/[][\\.*^$]/\\&/g')
+    commits=$(git log --no-merges --grep="^${escaped_subject}" $START_TAG..$END_TAG | \
 	    grep '^commit\s\w*' | cut -d ' ' -f2)
     
     if [ "X$commits" != "X" ]; then
@@ -71,7 +72,7 @@ do
 
     # 如果patch-id相同, 不继续比较了, 处理下一个文件
     if [ ! -f $f ]; then
-	rm -f patches.temp/*
+	rm -rf patches.temp/*
 	continue
     fi
 
@@ -94,6 +95,6 @@ do
     if [ -f $f ]; then
 	mv $f patches.todo
     fi
-    rm -f patches.temp/*
+    rm -rf patches.temp/*
 done
 
