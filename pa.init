@@ -1,0 +1,14 @@
+#!/bin/bash
+
+alias apply='$HOME/pa/flow/apply'
+alias drop='$HOME/pa/flow/drop'
+alias filter='$HOME/pa/flow/filter'
+alias goahead='$HOME/pa/flow/goahead'
+alias reserve='$HOME/pa/flow/reserve'
+alias bisect='$HOME/pa/bisect'
+
+echo "flow:" 
+echo "<filter> --> <apply> --无冲突--> done(万事大吉)"
+echo "                     --有冲突--> [查看rej文件] -- 解决冲突 --> <goahead>"
+echo "                                               --不需要应用 -> <drop>"
+echo "                                               ---- 未知 ----> <reserve>"
