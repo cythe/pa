@@ -14,10 +14,14 @@ ARCH=arm64
 CROSS=aarch64-wrs-linux-
 KERNEL_DIR=`find $WORK_DIR/tmp-glibc/work-shared/ -maxdepth 2 -name "kernel-source"`
 OUT_DIR=$WORK_DIR/obj_out
-THREADs=-j96
+THREADs=-j48
 CONFIG_F=config
 
 set_env() {
+    if [ ! -d $OUT_DIR ]; then
+	mkdir -p $OUT_DIR
+    fi
+
     if [ -f bisect.conf ]; then
 	echo_c SC_GREEN "Read ppre from config."
 	PPRE=`cat bisect.conf`
@@ -30,11 +34,15 @@ set_env() {
 	fi
 	echo $PPRE > bisect.conf
     fi
+    # we need some tools provided by sysroot-native, e.g. pahole
+    export PATH=$PATH:$WORK_DIR/$PPRE/usr/bin
+    # add cross tools to PATH
     export PATH=$PATH:$WORK_DIR/$PPRE/usr/bin/aarch64-wrs-linux
 }
 
 
-allyesmake() {
+do_allyesmake() {
+    echo_c SC_B_GREEN "progress: [allyes make]."
     rm -rf $OUT_DIR
     make -C $KERNEL_DIR ARCH=$ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR allyesconfig
     make $THREADs -C $KERNEL_DIR ARCH=$ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR > /dev/null
@@ -45,7 +53,8 @@ allyesmake() {
     exit 0
 }
 
-menuconfig() {
+do_menuconfig() {
+    echo_c SC_B_GREEN "progress: [menuconfig]."
     make $THREADs -C $KERNEL_DIR ARCH=$ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR menuconfig
     if [ "$?" != "0" ]; then
 	echo_c SC_RED "failed."
@@ -56,7 +65,8 @@ menuconfig() {
     exit 0
 }
 
-make() {
+do_make() {
+    echo_c SC_B_GREEN "progress: [make]."
     cp $CONFIG_F $OUT_DIR/.config
     make $THREADs -C $KERNEL_DIR ARCH=$ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR
     make $THREADs -C $KERNEL_DIR ARCH=$ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR modules_install INSTALL_MOD_PATH=$OUT_DIR/__mod/
@@ -67,7 +77,8 @@ make() {
     exit 0
 }
 
-bisect(){
+do_bisect() {
+    echo_c SC_B_GREEN "progress: [bisect]."
 
     patches_tmp=""
     patches_failed=0
@@ -102,19 +113,23 @@ bisect(){
 
 set_env
 
+if [ "$#" == "0" ]; then
+    do_bisect
+fi
+
 case "$1" in
     "make")
-	make
+	do_make
 	;;
     "menuconfig")
-	menuconfig
+	do_menuconfig
 	;;
     "allyesmake")
-	allyesmake
+	do_allyesmake
 	;;
     *)
 	echo_c SC_B_CYAN "Usage1: $0"
-	echo_c SC_B_CYAN "\tbisect Verify"
+	echo_c SC_B_CYAN "\tThis usage will run bisect Verify progress."
 	echo
 	echo_c SC_B_CYAN "Usage2: $0 [cmd]"
 	echo_c SC_B_CYAN "cmd:"
