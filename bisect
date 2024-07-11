@@ -46,8 +46,11 @@ set_env() {
     # we need some tools provided by sysroot-native, e.g. pahole
     export PATH=$PATH:$WORK_DIR/$PPRE/usr/bin
     # add cross tools to PATH
-    CROSSDIR=`find $WORK_DIR/$PPRE/usr/bin/ -maxdepth 1 | grep ${toolchain_arch}`
+    pushd $WORK_DIR/$PPRE/usr/bin/
+    temp_CROSSDIR=`find . -maxdepth 1 | grep wrs-linux`
+    popd
 
+    CROSSDIR=$WORK_DIR/$PPRE/usr/bin/${temp_CROSSDIR}
     export PATH=$PATH:${CROSSDIR}
     echo "crossdir = [$CROSSDIR]"
     pushd ${CROSSDIR}
@@ -69,6 +72,7 @@ do_allyesmake() {
 
 do_menuconfig() {
     echo_c SC_B_GREEN "progress: [menuconfig]."
+    cp $CONFIG_F $OUT_DIR/.config
     make $THREADs -C $KERNEL_DIR ARCH=$ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR menuconfig
     if [ "$?" != "0" ]; then
 	echo_c SC_RED "failed."
