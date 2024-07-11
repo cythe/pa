@@ -9,9 +9,18 @@ if [ "$?" != "0" ]; then
 fi
 
 WORK_DIR=`pwd`
-
-ARCH=arm64
-CROSS=aarch64-wrs-linux-
+#
+ARCH=x86_64
+#ARCH=arm64
+#
+if [ "$ARCH" = "x86_64" ]; then
+    toolchain_arch=x86_64
+elif [ "$ARCH" = "arm64" ]; then
+    toolchain_arch=aarch64
+else
+    echo_c SC_RED "Can't get toolchain_arch, please add..."
+    exit 1
+fi
 KERNEL_DIR=`find $WORK_DIR/tmp-glibc/work-shared/ -maxdepth 2 -name "kernel-source"`
 OUT_DIR=$WORK_DIR/obj_out
 THREADs=-j48
@@ -37,9 +46,14 @@ set_env() {
     # we need some tools provided by sysroot-native, e.g. pahole
     export PATH=$PATH:$WORK_DIR/$PPRE/usr/bin
     # add cross tools to PATH
-    export PATH=$PATH:$WORK_DIR/$PPRE/usr/bin/aarch64-wrs-linux
-}
+    CROSSDIR=`find $WORK_DIR/$PPRE/usr/bin/ -maxdepth 1 | grep ${toolchain_arch}`
 
+    export PATH=$PATH:${CROSSDIR}
+    echo "crossdir = [$CROSSDIR]"
+    pushd ${CROSSDIR}
+    CROSS=`find . -maxdepth 1 | ls | awk 'NR==1{a=$0;next}{for(i=1;i<=length(a);i++)if(substr(a,i,1)!=substr($0,i,1)){a=substr(a,1,i-1);break}}END{print a}'`
+    popd
+}
 
 do_allyesmake() {
     echo_c SC_B_GREEN "progress: [allyes make]."
@@ -69,6 +83,10 @@ do_make() {
     echo_c SC_B_GREEN "progress: [make]."
     cp $CONFIG_F $OUT_DIR/.config
     make $THREADs -C $KERNEL_DIR ARCH=$ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR
+    if [ "$?" != "0" ]; then
+	echo_c SC_RED "failed."
+	exit 1
+    fi
     make $THREADs -C $KERNEL_DIR ARCH=$ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR modules_install INSTALL_MOD_PATH=$OUT_DIR/__mod/
     if [ "$?" != "0" ]; then
 	echo_c SC_RED "failed."
