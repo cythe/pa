@@ -3,30 +3,49 @@
 PADIR=$(dirname $(readlink -f $0))
 . $PADIR/utils
 
-which apply > /dev/null 2>&1
-if [ "$?" != "0" ]; then
-    source $PADIR/pa.init
-fi
-
 WORK_DIR=`pwd`
-#
-ARCH=x86_64
-#ARCH=arm64
-#
-if [ "$ARCH" = "x86_64" ]; then
-    toolchain_arch=x86_64
-elif [ "$ARCH" = "arm64" ]; then
-    toolchain_arch=aarch64
-else
-    echo_c SC_RED "Can't get toolchain_arch, please add..."
-    exit 1
-fi
+
 KERNEL_DIR=`find $WORK_DIR/tmp-glibc/work-shared/ -maxdepth 2 -name "kernel-source"`
 OUT_DIR=$WORK_DIR/obj_out
 THREADs=-j48
 CONFIG_F=config
 
+MACHINE_NAME=""
+KERNEL_ARCH=""
+TOOLCHAIN_ARCH=""
+
+get_machine_name() {
+    MACHINE_NAME=`cat conf/local.conf | grep ^MACHINE | cut -d '=' -f2 | cut -d '"' -f2`
+    echo_c SC_BLUE "MACHINE_NAME: $MACHINE_NAME"
+}
+
+get_layer(){
+    find layers -maxdepth 3 -name "machine" -exec grep -Hrn $MACHINE_NAME {} \; | cut -d ':' -f1 | sort | uniq
+}
+
+get_arch(){
+    case "$MACHINE_NAME" in
+	"marvell-cn96xx" | "marvell-cn10xxx" | "marvell-cn106xx")
+	    KERNEL_ARCH=arm64
+	    TOOLCHAIN_ARCH=aarch64
+	    echo_c SC_BLUE "KERNEL_ARCH: $KERNEL_ARCH"
+	    echo_c SC_BLUE "TOOLCHAIN_ARCH: $TOOLCHAIN_ARCH"
+	    ;;
+	"intel-x86-64")
+	    KERNEL_ARCH=x86_64
+	    TOOLCHAIN_ARCH=x86_64
+	    echo_c SC_BLUE "KERNEL_ARCH: $KERNEL_ARCH"
+	    echo_c SC_BLUE "TOOLCHAIN_ARCH: $TOOLCHAIN_ARCH"
+	    ;;
+	*)
+	    echo_c SC_RED "Can't get architecture of machine [$MACHINE_NAME]... please fix me."
+	    exit 1
+    esac
+}
+
 set_env() {
+    get_machine_name
+    get_arch
     if [ ! -d $OUT_DIR ]; then
 	mkdir -p $OUT_DIR
     fi
@@ -61,8 +80,8 @@ set_env() {
 do_allyesmake() {
     echo_c SC_B_GREEN "progress: [allyes make]."
     rm -rf $OUT_DIR
-    make -C $KERNEL_DIR ARCH=$ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR allyesconfig
-    make $THREADs -C $KERNEL_DIR ARCH=$ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR > /dev/null
+    make -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR allyesconfig
+    make $THREADs -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR > /dev/null
     if [ "$?" != "0" ]; then
 	echo_c SC_RED "failed."
 	exit 1
@@ -73,7 +92,7 @@ do_allyesmake() {
 do_menuconfig() {
     echo_c SC_B_GREEN "progress: [menuconfig]."
     cp $CONFIG_F $OUT_DIR/.config
-    make $THREADs -C $KERNEL_DIR ARCH=$ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR menuconfig
+    make $THREADs -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR menuconfig
     if [ "$?" != "0" ]; then
 	echo_c SC_RED "failed."
 	exit 1
@@ -86,12 +105,12 @@ do_menuconfig() {
 do_make() {
     echo_c SC_B_GREEN "progress: [make]."
     cp $CONFIG_F $OUT_DIR/.config
-    make $THREADs -C $KERNEL_DIR ARCH=$ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR
+    make $THREADs -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR
     if [ "$?" != "0" ]; then
 	echo_c SC_RED "failed."
 	exit 1
     fi
-    make $THREADs -C $KERNEL_DIR ARCH=$ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR modules_install INSTALL_MOD_PATH=$OUT_DIR/__mod/
+    make $THREADs -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR modules_install INSTALL_MOD_PATH=$OUT_DIR/__mod/
     if [ "$?" != "0" ]; then
 	echo_c SC_RED "failed."
 	exit 1
@@ -114,7 +133,7 @@ do_bisect() {
 	popd
 
 	cp $CONFIG_F $OUT_DIR/.config
-	make $THREADs -C $KERNEL_DIR ARCH=$ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR
+	make $THREADs -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR
 	if [ "$?" != "0" ]; then
 	    echo_c SC_RED "failed."
 	    patches_tmp="$patches_tmp $curr"
