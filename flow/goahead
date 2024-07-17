@@ -3,11 +3,11 @@
 WORK_DIR=$(dirname $(readlink -f $0))
 . $WORK_DIR/../utils
 
-create_dir patches.over
+create_dir .patches.over
 
 clean_rej
 
 git add .
 git am --continue
 
-mv -v `ls patches.todo/*.patch | head -n 1` patches.over
+mv -v `ls .patches.todo/*.patch | head -n 1` .patches.over

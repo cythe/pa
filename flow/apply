@@ -3,9 +3,9 @@
 WORK_DIR=$(dirname $(readlink -f $0))
 . $WORK_DIR/../utils
 
-patches_dir=patches.todo
-patched_dir=patches.over
-ref_dir=patches.ref
+patches_dir=.patches.todo
+patched_dir=.patches.over
+ref_dir=.patches.ref
 
 create_dir $patched_dir
 

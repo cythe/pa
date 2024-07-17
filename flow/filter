@@ -10,15 +10,15 @@ DIFFAPP=vimdiff
 # Generally:
 #	START_TAG=SDK base on which kernel TAG
 #	END_TAG=
-#START_TAG=v5.3-rc8
+START_TAG=v5.3-rc8
 #START_TAG=v5.15-rc7
-START_TAG=v6.0-rc7
+#START_TAG=v6.0-rc7
 END_TAG=
 
 # Patches DIR
 # TDIR
-# ├── patch will be droped   -> patches.drop
-# └── patch will be applied  -> patches.todo
+# ├── patch will be droped   -> .patches.drop
+# └── patch will be applied  -> .patches.todo
 # Get from cmd line by default
 TDIR=$1
 
@@ -28,9 +28,9 @@ TDIR=$1
 WORK_DIR=$(dirname $(readlink -f $0))
 . $WORK_DIR/../utils
 
-create_dir patches.drop/same
-create_dir patches.drop/revert
-create_dir patches.todo
+create_dir .patches.drop/same
+create_dir .patches.drop/revert
+create_dir .patches.todo
 
 for f in `ls $TDIR/*.patch`
 do
@@ -46,7 +46,7 @@ do
     if [ "X$commits" != "X" ]; then
 	echo_c SC_BLUE "[Found Commits]: $commits"
     else
-	mv $f patches.todo
+	mv $f .patches.todo
 	continue
     fi
 
@@ -54,8 +54,8 @@ do
     # 先遍历一遍, 看看git patch-id是不是一样
     for c in $commits
     do
-	mkdir patches.temp/$c
-	patchname=`git format-patch -1 $c -o patches.temp/$c`
+	mkdir -p .patches.temp/$c
+	patchname=`git format-patch -1 $c -o .patches.temp/$c`
 
 	patchidsrc=`cat $f | git patch-id | cut -d ' ' -f1`
 	patchiddest=`cat $patchname | git patch-id | cut -d ' ' -f1`
@@ -63,38 +63,38 @@ do
 	    echo_c SC_BLUE "patch-id are:"
 	    echo_c SC_BLUE "    $patchidsrc"
 	    echo_c SC_BLUE "    $patchiddest"
-	    mv $f patches.drop/same/
+	    mv $f .patches.drop/same/
 	    BN=$(basename $f)
-	    mv $patchname patches.drop/same/$BN.same
+	    mv $patchname .patches.drop/same/$BN.same
 	    break
 	fi
     done
 
     # 如果patch-id相同, 不继续比较了, 处理下一个文件
     if [ ! -f $f ]; then
-	rm -rf patches.temp/*
+	rm -rf .patches.temp/*
 	continue
     fi
 
     for c in $commits
     do
 	echo_c SC_GREEN "Please compare this patch with commit [$c]."
-	patchname=`ls patches.temp/$c/*.patch`
+	patchname=`ls .patches.temp/$c/*.patch`
 	$DIFFAPP $f $patchname
 
 	read -p 'Are these two patches the same?? [y|N]: ' choice
 	echo "choice = $choice"
 	if [ "X$choice" = "Xy" ]; then
-	    mv $f patches.drop/same/
+	    mv $f .patches.drop/same/
 	    BN=$(basename $f)
-	    mv $patchname patches.drop/same/$BN.same
+	    mv $patchname .patches.drop/same/$BN.same
 	    break
 	fi
     done
 
     if [ -f $f ]; then
-	mv $f patches.todo
+	mv $f .patches.todo
     fi
-    rm -rf patches.temp/*
+    rm -rf .patches.temp/*
 done
 

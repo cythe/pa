@@ -3,10 +3,10 @@
 WORK_DIR=$(dirname $(readlink -f $0))
 . $WORK_DIR/../utils
 
-create_dir patches.drop
+create_dir .patches.drop
 
 git checkout .
 clean_rej
 git am --abort
 
-mv -v `ls patches.todo/*.patch | head -n 1` patches.drop
+mv -v `ls .patches.todo/*.patch | head -n 1` .patches.drop
