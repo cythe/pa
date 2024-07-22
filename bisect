@@ -5,7 +5,6 @@ PADIR=$(dirname $(readlink -f $0))
 
 WORK_DIR=`pwd`
 
-KERNEL_DIR=`find $WORK_DIR/tmp-glibc/work-shared/ -maxdepth 2 -name "kernel-source"`
 OUT_DIR=$WORK_DIR/obj_out
 THREADs=-j48
 CONFIG_F=config
@@ -13,6 +12,7 @@ CONFIG_F=config
 MACHINE_NAME=""
 KERNEL_ARCH=""
 TOOLCHAIN_ARCH=""
+KERNEL_DIR=""
 
 get_machine_name() {
     MACHINE_NAME=`cat conf/local.conf | grep ^MACHINE | cut -d '=' -f2 | cut -d '"' -f2`
@@ -21,6 +21,10 @@ get_machine_name() {
 
 get_layer(){
     find layers -maxdepth 3 -name "machine" -exec grep -Hrn $MACHINE_NAME {} \; | cut -d ':' -f1 | sort | uniq
+}
+
+get_kernel(){
+    KERNEL_DIR=`find $WORK_DIR/tmp-glibc/work-shared/$MACHINE_NAME -name "kernel-source"`
 }
 
 get_arch(){
@@ -46,6 +50,8 @@ get_arch(){
 set_env() {
     get_machine_name
     get_arch
+    get_kernel
+
     if [ ! -d $OUT_DIR ]; then
 	mkdir -p $OUT_DIR
     fi
