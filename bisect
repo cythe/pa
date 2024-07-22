@@ -158,6 +158,22 @@ do_bisect() {
     done
 }
 
+do_my_command() {
+    echo crossdir == ${CROSSDIR}
+    echo cross == ${CROSS}
+    ${CROSS}gcc --version
+    ${CROSS}gcc --help
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:tmp-glibc/work/octeontx2-wrs-linux/bash/5.2.21/recipe-sysroot/usr/lib
+    export LIBRARY_PATH=$LIBRARY_PATH:tmp-glibc/work/octeontx2-wrs-linux/bash/5.2.21/recipe-sysroot/usr/lib
+    ${CROSS}gcc -I tmp-glibc/work/octeontx2-wrs-linux/bash/5.2.21/recipe-sysroot/usr/include test.c -c test.o
+    ${CROSS}gcc -Ltmp-glibc/work/octeontx2-wrs-linux/bash/5.2.21/recipe-sysroot/usr/lib -Btmp-glibc/work/octeontx2-wrs-linux/bash/5.2.21/recipe-sysroot/usr/lib -lc test.o -o test
+    if [ "$?" != "0" ]; then
+        echo_c SC_RED "failed."
+        exit 1
+    fi
+    exit 0
+}
+
 set_env
 
 if [ "$#" == "0" ]; then
@@ -173,6 +189,9 @@ case "$1" in
 	;;
     "allyesmake")
 	do_allyesmake
+	;;
+    "my_command")
+	do_my_command
 	;;
     *)
 	echo_c SC_B_CYAN "Usage1: $0"
