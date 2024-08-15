@@ -5,6 +5,7 @@ alias drop='$HOME/pa/flow/drop'
 alias filter='$HOME/pa/flow/filter'
 alias goahead='$HOME/pa/flow/goahead'
 alias reserve='$HOME/pa/flow/reserve'
+alias rejclean='$HOME/pa/flow/rejclean'
 alias bisect='$HOME/pa/bisect'
 
 echo "flow:" 
