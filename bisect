@@ -116,11 +116,25 @@ do_make() {
 	echo_c SC_RED "failed."
 	exit 1
     fi
+
+    echo_c SC_B_GREEN "progress: [install modules]."
+    rm -rf $OUT_DIR/__mod
     make $THREADs -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR modules_install INSTALL_MOD_PATH=$OUT_DIR/__mod
     if [ "$?" != "0" ]; then
 	echo_c SC_RED "failed."
 	exit 1
     fi
+
+    echo_c SC_B_GREEN "progress: [package modules]."
+    pushd $OUT_DIR/__mod/lib/modules > /dev/null
+    pushd * > /dev/null
+    rm build source
+    popd > /dev/null
+    MOD_V=`ls`
+    tar -zcvf $MOD_V.tar.gz $MOD_V > /dev/null 2>&1
+    module_package=`pwd -P`
+    echo_c SC_B_BLUE "modules location: $module_package/$MOD_V.tar.gz"
+    popd > /dev/null
     exit 0
 }
 
