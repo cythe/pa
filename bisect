@@ -116,7 +116,7 @@ do_make() {
 	echo_c SC_RED "failed."
 	exit 1
     fi
-    make $THREADs -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR modules_install INSTALL_MOD_PATH=$OUT_DIR/__mod/
+    make $THREADs -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR modules_install INSTALL_MOD_PATH=$OUT_DIR/__mod
     if [ "$?" != "0" ]; then
 	echo_c SC_RED "failed."
 	exit 1
