@@ -1,6 +1,5 @@
 #!/bin/bash
 
-PADIR=$(dirname $(readlink -f $0))
 . $PADIR/utils
 
 WORK_DIR=`pwd`
@@ -152,7 +151,7 @@ do_bisect() {
     while true
     do
 	pushd $KERNEL_DIR
-	apply 1
+	$PADIR/flow/apply 1
 	if [ "$?" != "0" ]; then
 	    break
 	fi
