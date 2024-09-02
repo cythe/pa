@@ -118,10 +118,12 @@ do_make() {
     cp $CONFIG_F $OUT_DIR/.config
     make $THREADs -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR
     if [ "$?" != "0" ]; then
-	echo_c SC_RED "failed."
-	exit 1
+	echo_c SC_RED "make failed."
+	return 1
     fi
+}
 
+do_mod_install() {
     echo_c SC_B_GREEN "progress: [install modules]."
     rm -rf $OUT_DIR/__mod
     make $THREADs -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR modules_install INSTALL_MOD_PATH=$OUT_DIR/__mod
@@ -157,13 +159,12 @@ do_bisect() {
 	fi
 	popd
 
-	cp $CONFIG_F $OUT_DIR/.config
-	make $THREADs -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR
+	do_make
 	if [ "$?" != "0" ]; then
-	    echo_c SC_RED "failed."
 	    patches_tmp="$patches_tmp $curr"
 	    patches_failed=$(($patches_failed + 1))
 	else
+	    echo_c SC_GREEN "Automatically save .config as config."
 	    cp $OUT_DIR/.config $CONFIG_F 
 	    patches_tmp=""
 	    patches_failed=0
@@ -202,6 +203,7 @@ fi
 case "$1" in
     "make")
 	do_make
+	do_mod_install
 	;;
     "menuconfig")
 	do_menuconfig
