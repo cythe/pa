@@ -5,7 +5,9 @@
 WORK_DIR=`pwd`
 
 OUT_DIR=$WORK_DIR/obj_out
-THREADs=-j48
+CPUS=`nproc`
+# Use half of server resource to build
+THREADs=-j$(expr $CPUS / 2)
 CONFIG_F=config
 
 MACHINE_NAME=""
