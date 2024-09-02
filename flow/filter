@@ -25,8 +25,7 @@ TDIR=$1
 ######################## Config End ########################
 
 
-WORK_DIR=$(dirname $(readlink -f $0))
-. $WORK_DIR/../utils
+. $PADIR/utils
 
 create_dir .patches.drop/same
 create_dir .patches.drop/revert
