@@ -15,7 +15,7 @@ TOOLCHAIN_ARCH=""
 KERNEL_DIR=""
 
 get_machine_name() {
-    MACHINE_NAME=`cat conf/local.conf | grep ^MACHINE | cut -d '=' -f2 | cut -d '"' -f2`
+    MACHINE_NAME=`cat conf/local.conf | grep ^MACHINE | head -n 1 | cut -d '=' -f2 | cut -d '"' -f2`
     echo_c SC_BLUE "MACHINE_NAME: $MACHINE_NAME"
 }
 
@@ -38,6 +38,12 @@ get_arch(){
 	"intel-x86-64")
 	    KERNEL_ARCH=x86_64
 	    TOOLCHAIN_ARCH=x86_64
+	    echo_c SC_BLUE "KERNEL_ARCH: $KERNEL_ARCH"
+	    echo_c SC_BLUE "TOOLCHAIN_ARCH: $TOOLCHAIN_ARCH"
+	    ;;
+	"nxp-imx6")
+	    KERNEL_ARCH=arm
+	    TOOLCHAIN_ARCH=arm
 	    echo_c SC_BLUE "KERNEL_ARCH: $KERNEL_ARCH"
 	    echo_c SC_BLUE "TOOLCHAIN_ARCH: $TOOLCHAIN_ARCH"
 	    ;;
