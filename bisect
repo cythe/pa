@@ -78,6 +78,8 @@ set_env() {
     # we need some tools provided by sysroot-native, e.g. pahole
     export PATH=$PATH:$WORK_DIR/$PPRE/usr/bin
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$WORK_DIR/$PPRE/usr/lib
+    export C_INCLUDE_PATH=$C_INCLUDE_PATH:$WORK_DIR/$PPRE/usr/include
+    export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$WORK_DIR/$PPRE/usr/include
     # add cross tools to PATH
     pushd $WORK_DIR/$PPRE/usr/bin/
     temp_CROSSDIR=`find . -maxdepth 1 | grep wrs-linux`
