@@ -42,7 +42,7 @@ get_arch(){
 	    echo_c SC_BLUE "KERNEL_ARCH: $KERNEL_ARCH"
 	    echo_c SC_BLUE "TOOLCHAIN_ARCH: $TOOLCHAIN_ARCH"
 	    ;;
-	"nxp-imx6")
+	"nxp-imx6" | "nxp-imx7")
 	    KERNEL_ARCH=arm
 	    TOOLCHAIN_ARCH=arm
 	    echo_c SC_BLUE "KERNEL_ARCH: $KERNEL_ARCH"
@@ -131,7 +131,7 @@ do_make() {
 do_mod_install() {
     echo_c SC_B_GREEN "progress: [install modules]."
     rm -rf $OUT_DIR/__mod
-    make $THREADs -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR modules_install INSTALL_MOD_PATH=$OUT_DIR/__mod
+    make $THREADs -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR modules_install INSTALL_MOD_PATH=$OUT_DIR/__mod > /dev/null
     if [ "$?" != "0" ]; then
 	echo_c SC_RED "failed."
 	exit 1
