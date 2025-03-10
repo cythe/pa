@@ -10,8 +10,8 @@ DIFFAPP=vimdiff
 # Generally:
 #	START_TAG=SDK base on which kernel TAG
 #	END_TAG=
-START_TAG=v5.3-rc8
-#START_TAG=v5.15-rc7
+#START_TAG=v6.6-rc7
+START_TAG=v5.15-rc7
 #START_TAG=v6.0-rc7
 END_TAG=
 
@@ -83,7 +83,7 @@ do
 
 	read -p 'Are these two patches the same?? [y|N]: ' choice
 	echo "choice = $choice"
-	if [ "X$choice" = "Xy" ]; then
+	if [[ "$choice" == y* ]]; then
 	    mv $f .patches.drop/same/
 	    BN=$(basename $f)
 	    mv $patchname .patches.drop/same/$BN.same
