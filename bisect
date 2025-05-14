@@ -15,6 +15,8 @@ KERNEL_ARCH=""
 TOOLCHAIN_ARCH=""
 KERNEL_DIR=""
 
+YOCTO_BUILD_WORK=`find . -maxdepth 2 -name "work"`
+YOCTO_BUILD_WORK_SHARED=`find . -maxdepth 2 -name "work-shared"`
 get_machine_name() {
     MACHINE_NAME=`cat conf/local.conf | grep ^MACHINE | head -n 1 | cut -d '=' -f2 | cut -d '"' -f2`
     echo_c SC_BLUE "MACHINE_NAME: $MACHINE_NAME"
@@ -25,12 +27,12 @@ get_layer(){
 }
 
 get_kernel(){
-    KERNEL_DIR=`find $WORK_DIR/tmp-glibc/work-shared/$MACHINE_NAME -name "kernel-source"`
+    KERNEL_DIR=`find $YOCTO_BUILD_WORK_SHARED/$MACHINE_NAME -name "kernel-source"`
 }
 
 get_arch(){
     case "$MACHINE_NAME" in
-	"marvell-cn96xx" | "marvell-cn10xxx" | "marvell-cn106xx")
+	"marvell-cn96xx" | "marvell-cn10xxx" | "marvell-cn106xx" | "nxp-imx8")
 	    KERNEL_ARCH=arm64
 	    TOOLCHAIN_ARCH=aarch64
 	    echo_c SC_BLUE "KERNEL_ARCH: $KERNEL_ARCH"
@@ -68,7 +70,7 @@ set_env() {
 	PPRE=`cat bisect.conf`
     else
 	echo_c SC_GREEN "Try to find a ppre..."
-	PPRE=`find tmp-glibc/work -maxdepth 4 -name "recipe-sysroot-native" | grep linux-yocto`
+	PPRE=`find $YOCTO_BUILD_WORK -maxdepth 4 -name "recipe-sysroot-native" | grep linux-yocto`
 	if [ "x$PPRE" == "x" ] ; then
 	    echo_c SC_RED "I can't found recipe-sysroot-native dir..."
 	    exit 1
@@ -188,10 +190,10 @@ do_my_command() {
     echo cross == ${CROSS}
     ${CROSS}gcc --version
     ${CROSS}gcc --help
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:tmp-glibc/work/octeontx2-wrs-linux/bash/5.2.21/recipe-sysroot/usr/lib
-    export LIBRARY_PATH=$LIBRARY_PATH:tmp-glibc/work/octeontx2-wrs-linux/bash/5.2.21/recipe-sysroot/usr/lib
-    ${CROSS}gcc -I tmp-glibc/work/octeontx2-wrs-linux/bash/5.2.21/recipe-sysroot/usr/include test.c -c test.o
-    ${CROSS}gcc -Ltmp-glibc/work/octeontx2-wrs-linux/bash/5.2.21/recipe-sysroot/usr/lib -Btmp-glibc/work/octeontx2-wrs-linux/bash/5.2.21/recipe-sysroot/usr/lib -lc test.o -o test
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:tmp-glibc/work/octeontx2-wrs-linux/bash/5.1.16-r0/recipe-sysroot/usr/lib
+    export LIBRARY_PATH=$LIBRARY_PATH:tmp-glibc/work/octeontx2-wrs-linux/bash/5.1.16-r0/recipe-sysroot/usr/lib
+    ${CROSS}gcc -I tmp-glibc/work/octeontx2-wrs-linux/bash/5.1.16-r0/recipe-sysroot/usr/include test.c -c test.o
+    ${CROSS}gcc -Ltmp-glibc/work/octeontx2-wrs-linux/bash/5.1.16-r0/recipe-sysroot/usr/lib -Btmp-glibc/work/octeontx2-wrs-linux/bash/5.1.16-r0/recipe-sysroot/usr/lib -lc test.o -o test
     if [ "$?" != "0" ]; then
         echo_c SC_RED "failed."
         exit 1
