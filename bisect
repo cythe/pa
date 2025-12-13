@@ -93,6 +93,9 @@ set_env() {
     pushd ${CROSSDIR}
     CROSS=`find . -maxdepth 1 | ls | awk 'NR==1{a=$0;next}{for(i=1;i<=length(a);i++)if(substr(a,i,1)!=substr($0,i,1)){a=substr(a,1,i-1);break}}END{print a}'`
     popd
+    export CROSS_CURSES_LIB="-lncurses -ltinfo"
+    export CROSS_CURSES_INC=-DCURSES_LOC="<curses.h>"
+    echo CROSS_CURSES_LIB=${CROSS_CURSES_LIB}
 }
 
 do_allyesmake() {
