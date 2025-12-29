@@ -126,6 +126,7 @@ do_menuconfig() {
 do_make() {
     echo_c SC_B_GREEN "progress: [make]."
     cp $CONFIG_F $OUT_DIR/.config
+    #bear -- make -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR
     make $THREADs -C $KERNEL_DIR ARCH=$KERNEL_ARCH CROSS_COMPILE=$CROSS O=$OUT_DIR
     if [ "$?" != "0" ]; then
 	echo_c SC_RED "make failed."
